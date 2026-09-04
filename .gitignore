@@ -1,0 +1,21 @@
+# Dependencies and builds
+node_modules/
+dist/
+coverage/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local runtime state
+*.db
+*.sqlite
+*.sqlite3
+*.log
+__pycache__/
+.pytest_cache/
+.venv/
+.vercel/

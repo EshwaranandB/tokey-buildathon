@@ -1,0 +1,16 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "Tokey Core public contract", "version": "0.1.0"},
+  "paths": {
+    "/v1/authorities": {"post": {"summary": "Create root authority"}},
+    "/v1/authorities/{authority_id}": {"get": {"summary": "Read authority"}},
+    "/v1/authorities/{authority_id}/delegate": {"post": {"summary": "Delegate attenuated authority"}},
+    "/v1/authorities/{authority_id}/revoke": {"post": {"summary": "Revoke authority"}},
+    "/v1/spend-requests": {"post": {"summary": "Evaluate economic request"}},
+    "/v1/spend-requests/{spend_request_id}/approval": {"post": {"summary": "Decide approval"}},
+    "/v1/spend-requests/{spend_request_id}/execution-authorization": {"post": {"summary": "Issue execution authorization"}},
+    "/v1/reservations/{reservation_id}/execute-v2": {"post": {"summary": "Execute authorized reservation"}},
+    "/v1/reservations/{reservation_id}/reconcile": {"post": {"summary": "Reconcile unknown execution"}},
+    "/v1/receipts/{receipt_id}": {"get": {"summary": "Read immutable receipt"}}
+  }
+}

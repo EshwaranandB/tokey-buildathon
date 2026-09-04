@@ -1,0 +1,9 @@
+{
+  "name": "tokey-mcp",
+  "transport": "stdio",
+  "command": "python",
+  "args": ["-m", "app.mcp_server"],
+  "environment": {
+    "TOKEY_MCP_CREDENTIAL": "set-a-provisioned-credential-locally"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "server": "tokey-mcp",
+  "authentication": "Every tool call resolves an authenticated Tokey actor; role and tenant controls are enforced by Core.",
+  "agent_permitted_loop": ["tokey_check_authority", "tokey_request_spend", "tokey_execution_authorize", "tokey_execute_reservation_v2", "tokey_reconcile_execution", "tokey_inspect_reservation", "tokey_inspect_receipt", "tokey_audit_trail"],
+  "operator_mutations": ["tokey_create_authority", "tokey_delegate_authority", "tokey_revoke_authority", "tokey_approve_spend"],
+  "constraints": ["Agent credentials cannot create their own root authority", "Agent credentials cannot increase or delegate their own authority", "Agent credentials cannot approve themselves", "Agent credentials cannot revoke arbitrary authorities"]
+}
