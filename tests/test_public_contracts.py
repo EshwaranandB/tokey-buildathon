@@ -22,6 +22,12 @@ class PublicContractTests(unittest.TestCase):
         self.assertIn("Test Mode", proof)
         self.assertIn("No real money moved", proof)
 
+    def test_denial_proof_stops_before_provider_execution(self):
+        proof = (ROOT / "docs" / "DENIAL_PROOF.md").read_text(encoding="utf-8")
+        self.assertIn("decision == DENY", proof)
+        self.assertIn("razorpay.call_count == 0", proof)
+        self.assertIn("razorpay.order_id is empty", proof)
+
     def test_no_environment_file_is_present(self):
         self.assertFalse(any(path.name.startswith(".env") and path.name != ".env.example" for path in ROOT.rglob(".env*")))
 

@@ -2,11 +2,26 @@
 
 ### Enforceable financial authority for autonomous AI agents
 
+[**Razorpay AI Buildathon — Track 01: AI Growth & Agentic Commerce**](https://razorpay.com/buildathon/)
+
 Tokey gives companies enforceable spending mandates for AI agents. It authorizes, blocks, or escalates agent-initiated purchases across payment rails—and produces a verifiable receipt for every completed decision.
 
 An agent can decide what it wants to buy. Tokey decides whether it is allowed to spend.
 
 > **Buildathon result:** a governed **₹1,799 INR** purchase completed through Razorpay Test Mode, moved through human approval and reserved authority, and reached `CAPTURED` only after Tokey verified provider evidence. Test Mode uses simulated funds; no real money moved.
+
+## Track 01 evaluation mapping
+
+| Razorpay's bar | Tokey proof |
+| --- | --- |
+| Explainable | Persisted intent, authority decision, reason codes, settlement evidence, and receipt |
+| Bounded | Budget, per-transaction limit, merchant, purpose, resource, rail, and expiry constraints |
+| Gated | Deterministic authorization plus human approval above the mandate threshold |
+| Audit trail | Immutable receipts and a traceable request-to-settlement lifecycle |
+| Graceful failure | A ₹7,999 out-of-mandate request was denied before Razorpay; provider calls remained zero |
+| Real execution | A ₹1,799 Razorpay Test Mode payment reached verified Tokey `CAPTURED` state |
+
+[Inspect the denial proof →](docs/DENIAL_PROOF.md)
 
 ## Why Tokey exists
 
@@ -20,6 +35,12 @@ Giving an AI agent a payment credential answers *how can it pay?* It does not an
 - How does the organization know the provider actually settled it?
 
 Tokey is the control plane between agent intent and financial execution. The model proposes an action; deterministic policy and authenticated authority govern the money.
+
+### Where AI ends—and financial authority begins
+
+AI interprets ambiguous human intent, searches, reasons, and selects the action it wants to request. Tokey does **not** use probabilistic AI to decide whether money may move.
+
+> We use AI where ambiguity is useful and deterministic systems where money requires certainty.
 
 ## How it works
 
@@ -81,6 +102,23 @@ Tokey does not treat a successful browser screen as financial finality. Provider
 
 [Read the Razorpay proof →](docs/RAZORPAY_PROOF.md)
 
+## Graceful failure: denied before payment
+
+The same authority permitted supplements from FitFuel, capped a transaction at ₹2,000, and required approval above ₹1,500. When the agent requested ₹7,999 headphones:
+
+```text
+₹7,999 headphones · electronics
+→ Tokey DENY
+→ no reservation
+→ Razorpay calls: 0
+→ Razorpay order: not created
+→ checkout: blocked
+```
+
+This is a financial control failure handled safely: nothing crashed, no compensating refund was needed, and the disallowed action never reached the payment rail.
+
+[Inspect the denial evidence →](docs/DENIAL_PROOF.md)
+
 ## Product surfaces
 
 The included React console is the real Tokey control-plane interface—not a standalone payment mock.
@@ -141,8 +179,9 @@ Start with:
 1. [Architecture](docs/ARCHITECTURE.md)
 2. [Five-minute demo walkthrough](docs/DEMO.md)
 3. [Razorpay Test Mode proof](docs/RAZORPAY_PROOF.md)
-4. [OpenClaw / MCP proof](docs/OPENCLAW_PROOF.md)
-5. [Public REST contract](contracts/api/openapi.json)
+4. [Fail-closed denial proof](docs/DENIAL_PROOF.md)
+5. [OpenClaw / MCP proof](docs/OPENCLAW_PROOF.md)
+6. [Public REST contract](contracts/api/openapi.json)
 
 ## Run the interface
 
