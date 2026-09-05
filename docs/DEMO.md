@@ -56,7 +56,7 @@ Emphasize that Tokey does not trust a checkout-success screen. It verifies provi
 
 ## 3:05–3:30 — Graceful failure
 
-Show the persisted denied activity:
+Show the test evidence described below. Only use persisted denied activity if its actual record and provider trace have been inspected before recording:
 
 ```text
 ₹7,999 headphones · electronics
@@ -66,7 +66,7 @@ Show the persisted denied activity:
 → no order created
 ```
 
-The failure happens before the payment rail. See [DENIAL_PROOF.md](DENIAL_PROOF.md).
+Explain the evidence boundaries: the real Core integration checks policy denial; separate harness tests verify that a denied response blocks provider calls. See [DENIAL_PROOF.md](DENIAL_PROOF.md). Do not label this combined test evidence a continuous live transaction.
 
 ## 3:30–4:10 — Architecture and AI boundary
 
@@ -96,4 +96,4 @@ End on:
 
 > **Give agents money. Keep control. See everything.**
 
-The buildathon repository contains the public product, contracts, and reproducible integration proof. Selected financial-kernel internals remain proprietary.
+The buildathon repository contains the public product interface, contracts, and documented integration evidence. Selected financial-kernel internals remain proprietary. Public tests validate documentation and contract structure, not the private enforcement engine.

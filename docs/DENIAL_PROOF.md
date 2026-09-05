@@ -40,7 +40,12 @@ agent intent
 → no Razorpay call
 ```
 
-The frozen end-to-end demonstration asserted all of the following:
+Two complementary checks establish this behavior. They were rerun on 5 September 2026: **4 tests passed**.
+
+1. The isolated integration test runs the real Core against a temporary database through authenticated HTTP calls. It verifies purpose/limit denial and absence of a reservation. Its later settlement/replay checks use synthetic signed evidence, not Razorpay network traffic.
+2. Three harness tests use a stubbed Core response and a test provider. They verify that a denied request cannot create an order or proceed to checkout. These establish adapter behavior; they are not a live provider execution trace.
+
+Together, the tests assert:
 
 ```text
 decision == DENY
@@ -56,4 +61,6 @@ This is the safety property Tokey is built to provide: a disallowed economic act
 
 ## Disclosure
 
-This is a sanitized record of the demonstrated Core-plus-Razorpay harness behavior. The public repository exposes the result and contract-level assertions while keeping proprietary authorization-kernel and provider-adapter implementations private.
+This document summarizes test evidence, not a published production denial record. No persisted denial ID or raw runtime trace is included here. Do not present the combined assertions as one continuous live run in the video.
+
+The tests above remain in the private implementation. Public tests check documentation and contract structure only; they do not independently exercise financial enforcement. The real Razorpay Test Mode capture is separately documented in [RAZORPAY_PROOF.md](RAZORPAY_PROOF.md).

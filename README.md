@@ -8,6 +8,10 @@ Tokey gives companies enforceable spending mandates for AI agents. It authorizes
 
 An agent can decide what it wants to buy. Tokey decides whether it is allowed to spend.
 
+**The agent decides what it wants to do. Tokey decides whether it is financially authorized. Razorpay moves the money.**
+
+[Judge's evidence guide](docs/EVIDENCE.md) · [Recording script and submission copy](docs/SUBMISSION.md)
+
 > **Buildathon result:** a governed **₹1,799 INR** purchase completed through Razorpay Test Mode, moved through human approval and reserved authority, and reached `CAPTURED` only after Tokey verified provider evidence. Test Mode uses simulated funds; no real money moved.
 
 ## Track 01 evaluation mapping
@@ -18,7 +22,7 @@ An agent can decide what it wants to buy. Tokey decides whether it is allowed to
 | Bounded | Budget, per-transaction limit, merchant, purpose, resource, rail, and expiry constraints |
 | Gated | Deterministic authorization plus human approval above the mandate threshold |
 | Audit trail | Immutable receipts and a traceable request-to-settlement lifecycle |
-| Graceful failure | A ₹7,999 out-of-mandate request was denied before Razorpay; provider calls remained zero |
+| Graceful failure | Real Core tests deny a ₹7,999 request; separate harness tests verify zero provider calls after denial |
 | Real execution | A ₹1,799 Razorpay Test Mode payment reached verified Tokey `CAPTURED` state |
 
 [Inspect the denial proof →](docs/DENIAL_PROOF.md)
@@ -115,7 +119,7 @@ The same authority permitted supplements from FitFuel, capped a transaction at �
 → checkout: blocked
 ```
 
-This is a financial control failure handled safely: nothing crashed, no compensating refund was needed, and the disallowed action never reached the payment rail.
+This expected behavior is covered by separate real-Core policy tests and stubbed harness tests. Their evidence and limits are documented below; the public repository does not include a persisted live denial trace.
 
 [Inspect the denial evidence →](docs/DENIAL_PROOF.md)
 
@@ -185,7 +189,7 @@ Start with:
 
 ## Run the interface
 
-Requirements: Node.js 18+ and npm.
+Requirements: Node.js 20+ and npm.
 
 ```bash
 cd frontend
