@@ -2,6 +2,14 @@
 
 ### Enforceable financial authority for autonomous AI agents
 
+## Demo
+
+<video src="https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/tokey-demo.mp4" controls width="100%" poster="frontend/public/razorpay.png">
+  Your browser does not support the video tag. <a href="frontend/tokey-demo.mp4">Download the demo video</a>.
+</video>
+
+
+
 [**Razorpay AI Buildathon — Track 01: AI Growth & Agentic Commerce**](https://razorpay.com/buildathon/)
 
 Tokey gives companies enforceable spending mandates for AI agents. It authorizes, blocks, or escalates agent-initiated purchases across payment rails—and produces a verifiable receipt for every completed decision.
