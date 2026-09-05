@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { formatMoneyExact } from "../lib/format";
 import { useAuth } from "../lib/store";
 import { Card, SectionHeader } from "../components/primitives/Card";
 import { Badge } from "../components/primitives/Badge";
@@ -18,7 +20,7 @@ export function ApprovalsPage() {
 
   const load = () => {
     setLoading(true);
-    api.dashboardApprovals().then((result) => setPending(result.items)).catch(() => setPending([])).finally(() => setLoading(false));
+    api.dashboardApprovals().then((result) => {setPending(result.items);setError(null);}).catch(() => {setPending([]);setError("Could not load approvals.");}).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, [api]);
@@ -42,7 +44,7 @@ export function ApprovalsPage() {
 
       {loading ? (
         <Skeleton lines={4} />
-      ) : pending.length === 0 ? (
+      ) : error && pending.length === 0 ? null : pending.length === 0 ? (
         <EmptyState icon={<CheckSquare className="h-5 w-5" />} title="No pending approvals" description="All evaluated spend requests have been decided. New approvals appear automatically when a request exceeds the authority's approval threshold." />
       ) : (
         <div className="space-y-2">
@@ -51,9 +53,9 @@ export function ApprovalsPage() {
               <ApprovalTrace active={1} />
               <div className="flex flex-wrap items-center gap-3">
                 <Badge tone="warn" dot>Approval required</Badge>
-                <span className="flex-1 text-xs text-ink">{formatAgentName(p.agent_id)} · {p.vendor} · {p.purpose}</span>
-                <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} loading={busyId === p.spend_request_id} onClick={() => decide(p.spend_request_id, false)}>Deny</Button>
-                <Button variant="primary" size="sm" icon={<Check className="h-3.5 w-3.5" />} loading={busyId === p.spend_request_id} onClick={() => decide(p.spend_request_id, true)}>Approve</Button>
+                <span className="flex-1 text-xs text-ink">{formatMoneyExact(p.amount_micros, p.currency)} · {formatAgentName(p.agent_id)} · {p.vendor} · {p.purpose} · <Link className="underline" to={"/transactions/" + encodeURIComponent(p.spend_request_id)}>Inspect request</Link></span>
+                {actor && ["OWNER", "ADMIN"].includes(actor.role) && <><Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} loading={busyId === p.spend_request_id} onClick={() => decide(p.spend_request_id, false)}>Deny</Button>
+                <Button variant="primary" size="sm" icon={<Check className="h-3.5 w-3.5" />} loading={busyId === p.spend_request_id} onClick={() => decide(p.spend_request_id, true)}>Approve</Button></>}
               </div>
             </Card>
           ))}

@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --canvas: #f8f8f7;
+  --surface: #ffffff;
+  --inset: #f3f3f1;
+  --hover: #eeeeeb;
+  --line: #e7e7e4;
+  --line-strong: #d9d9d5;
+  --ink: #1c1c1a;
+  --ink-2: #5d5d58;
+  --ink-3: #94948d;
+  --accent: #4f46e5;
+  --red: #c4320a;
+  --green: #0a7d55;
+  --orange: #a05a03;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: rgb(28 28 26 / 0.12);
+}
+
+/* Restrained scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d0 transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #d4d4d0;
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Tabular numerals for money, counts, ids */
+.tk-num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(28 28 26 / 0.12);
+  border-radius: 6px;
+}
+
+/* Skeleton shimmer (kept subtle — no glow, per quality filter) */
+.tk-skeleton {
+  border-radius: 6px;
+  background-color: #ebebe8;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Keyboard hint */
+.tk-kbd {
+  @apply inline-flex h-5 min-w-5 items-center justify-center rounded-control border border-line bg-surface px-1 font-mono text-2xs text-ink-2 shadow-btn;
+}
+
+.primitive-card-bar {
+  @apply min-h-9 px-3 py-2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/store";
 import { Card, SectionHeader } from "../components/primitives/Card";
 import { Badge } from "../components/primitives/Badge";
@@ -11,15 +11,17 @@ import { Table } from "../components/primitives/Table";
 import type { Authority } from "../lib/types";
 
 export function AuthoritiesPage() {
-  const { api } = useAuth();
+  const { api, actor } = useAuth();
   const navigate = useNavigate();
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [seeded, setSeeded] = useState<Authority[]>([]);
   useEffect(() => {
     let cancelled = false;
     api.dashboardAuthorities()
       .then((result) => !cancelled && setSeeded(result.items))
-      .catch(() => !cancelled && setSeeded([]));
+      .catch(() => {if(!cancelled)setError("Could not load records from Core.");}).finally(() => {if(!cancelled)setLoading(false);});
     return () => {
       cancelled = true;
     };
@@ -27,11 +29,14 @@ export function AuthoritiesPage() {
 
   const authorities = seeded;
 
+  if (loading) return <Card><p role="status">Loading records…</p></Card>;
+  if (error) return <Card><p role="alert" className="text-danger">{error}</p></Card>;
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <SectionHeader
         title="Authorities"
         description="Real spending authority granted to your agents."
+        action={actor && ["OWNER", "ADMIN"].includes(actor.role) ? <Link className="rounded-control bg-ink px-3 py-2 text-xs text-surface" to="/authorities/new">Grant authority</Link> : undefined}
       />
 
       {authorities.length === 0 ? (

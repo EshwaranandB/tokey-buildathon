@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth, pushRecent } from "../lib/store";
 import { formatMoney, formatDateTime, timeAgo, truncateMiddle } from "../lib/format";
 import { Card, SectionHeader } from "../components/primitives/Card";
@@ -14,7 +14,7 @@ import type { Authority, Receipt } from "../lib/types";
 
 export function AuthorityDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { api } = useAuth();
+  const { api, actor } = useAuth();
   const navigate = useNavigate();
   const [authority, setAuthority] = useState<Authority | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -80,7 +80,7 @@ export function AuthorityDetailPage() {
               agent <span className="text-ink-soft">{authority.agent_id}</span> · principal {authority.principal_id} · {authority.currency}
             </p>
           </div>
-          {authority.status === "ACTIVE" && (
+          {authority.status === "ACTIVE" && actor && ["OWNER", "ADMIN"].includes(actor.role) && (
             <Button variant="danger" size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setShowRevoke((v) => !v)}>
               Revoke
             </Button>
@@ -90,10 +90,10 @@ export function AuthorityDetailPage() {
         {showRevoke && (
           <div className="mt-4 rounded-md border border-danger-soft bg-danger-soft/40 p-3">
             <p className="flex items-center gap-1 text-xs font-medium text-danger-strong">
-              <AlertTriangle className="h-3.5 w-3.5" /> Revoke cascades to all children and cancels active reservations.
+              <AlertTriangle className="h-3.5 w-3.5" /> Revoke this authority and its children. Core determines how in-flight reservations are handled.
             </p>
             <div className="mt-2 flex gap-2">
-              <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="reason" className="max-w-xs" />
+              <Input value={reason} onChange={(e) => setReason(e.target.value)} aria-label="Revocation reason" placeholder="reason" className="max-w-xs" />
               <Button variant="danger" size="sm" loading={submitting} onClick={revoke}>Confirm revoke</Button>
               <Button variant="ghost" size="sm" onClick={() => setShowRevoke(false)}>Cancel</Button>
             </div>
@@ -141,7 +141,7 @@ export function AuthorityDetailPage() {
             {receipts.map((r) => (
               <li key={r.id} className="flex items-center gap-3 rounded-md px-2 py-1.5 text-xs hover:bg-sunken">
                 <Badge tone="neutral">{r.event_type.replace(/_/g, " ")}</Badge>
-                <span className="tk-num font-mono text-ink-faint">{truncateMiddle(r.id)}</span>
+                <Link className="tk-num font-mono underline" to={"/receipts?authority=" + encodeURIComponent(authority.id) + "&receipt=" + encodeURIComponent(r.id)}>{truncateMiddle(r.id)}</Link>
                 <span className="tk-num flex-1 truncate font-mono text-ink-faint">{truncateMiddle(r.receipt_hash)}</span>
                 <span className="text-ink-faint">{timeAgo(r.created_at)}</span>
               </li>

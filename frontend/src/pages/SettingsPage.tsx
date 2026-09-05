@@ -126,7 +126,7 @@ export function SettingsPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs text-ink-soft">Name</label>
-              <Input name="name" placeholder="e.g. shopping-agent" />
+              <Input name="name" placeholder="Credential label" />
             </div>
             <div>
               <label className="mb-1 block text-xs text-ink-soft">Agent ID (AGENT only)</label>

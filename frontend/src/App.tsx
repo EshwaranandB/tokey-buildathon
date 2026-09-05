@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { OverviewPage } from "./pages/OverviewPage";
 import { AuthoritiesPage } from "./pages/AuthoritiesPage";
+import { GrantAuthorityPage } from "./pages/GrantAuthorityPage";
 import { AuthorityDetailPage } from "./pages/AuthorityDetailPage";
 import { AgentsPage } from "./pages/AgentsPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
@@ -45,6 +46,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<OverviewPage />} />
         <Route path="/authorities" element={<AuthoritiesPage />} />
+        <Route path="/authorities/new" element={<GrantAuthorityPage />} />
         <Route path="/authorities/:id" element={<AuthorityDetailPage />} />
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />

@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+async function source(path) {
+  const text = readFileSync(new URL(path, import.meta.url), "utf8");
+  const js = ts.transpileModule(text, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
+  return import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
+}
+const money = await source("../src/lib/authorityInput.ts");
+assert.equal(money.positiveMicros("1.000001"), 1000001);
+assert.equal(money.positiveMicros("9007199254.740991"), Number.MAX_SAFE_INTEGER);
+for (const value of ["0", "-1", "1e6", "1.0000001", "9007199254.740992", "NaN"]) assert.throws(() => money.positiveMicros(value));
+assert.deepEqual(money.scopeValues("one, two,one"), ["one", "two"]);
+assert.throws(() => money.scopeValues(" , "));
+const { matchingReceipts, latestRazorpayCapture, transactions } = await source("../src/lib/records.ts");
+const transaction = { id:"s1", spend_request_id:"s1", authority_id:"a1", rail:"razorpay", state:"CAPTURED", reservation_id:"r1" };
+const receipt = { id:"receipt1", event_type:"SPEND_CAPTURED_V2", created_at:"2026-09-01T00:00:00Z", payload:{ spend_request_id:"s1", reservation_id:"r1", rail:"razorpay" } };
+assert.deepEqual(matchingReceipts([receipt, {...receipt, payload:{spend_request_id:"s10"}}],transaction), [receipt]);
+assert.deepEqual(matchingReceipts([{payload:{reservation_id:null}}], {...transaction,reservation_id:null}), []);
+assert.equal(await latestRazorpayCapture({dashboardTransactions:async()=>({items:[]})}),null);
+const second = {...transaction,id:"s2",spend_request_id:"s2",reservation_id:"r2"};
+const newer = {...receipt,id:"receipt2",created_at:"2026-09-03T00:00:00Z",payload:{spend_request_id:"s2",rail:"razorpay"}};
+let reads=0;
+const api={dashboardTransactions:async()=>({items:[transaction,second]}),getAuthorityReceipts:async()=>{reads++;return [receipt,newer];}};
+assert.equal((await latestRazorpayCapture(api)).receipt.id,"receipt2");
+assert.equal(reads,1);
+assert.equal(await latestRazorpayCapture({...api,getAuthorityReceipts:async()=>[{...receipt,payload:{...receipt.payload,rail:"mock"}}]}),null);
+await assert.rejects(()=>latestRazorpayCapture({...api,getAuthorityReceipts:async()=>{throw Error("offline");}}),/offline/);
+const offsets=[];
+const paged=await transactions({dashboardTransactions:async(limit,offset)=>{offsets.push(offset);return {items:offset===0?Array(100).fill(transaction):[second]};}});
+assert.equal(paged.length,101);
+assert.deepEqual(offsets,[0,100]);
+console.log("Coherence checks passed: integer money, scope validation, exact receipt binding, latest capture, errors and pagination.");

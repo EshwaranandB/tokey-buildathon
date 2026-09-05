@@ -16,17 +16,21 @@ function tone(state: string): "ok" | "warn" | "danger" | "mystery" | "neutral" {
 export function TransactionsPage() {
   const { api } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   useEffect(() => {
     let cancelled = false;
-    api.dashboardTransactions().then((result) => !cancelled && setItems(result.items)).catch(() => !cancelled && setItems([]));
+    api.dashboardTransactions().then((result) => !cancelled && setItems(result.items)).catch(() => {if(!cancelled)setError("Could not load records from Core.");}).finally(() => {if(!cancelled)setLoading(false);});
     return () => {
       cancelled = true;
     };
   }, [api]);
   const rows = useMemo(() => items.filter((item) => stateFilter(filter, item.state)), [filter, items]);
 
+  if (loading) return <Card><p role="status">Loading records…</p></Card>;
+  if (error) return <Card><p role="alert" className="text-danger">{error}</p></Card>;
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <SectionHeader title="Transactions" description="Every economic action stays linked to its agent, authority, rail, and receipt." />

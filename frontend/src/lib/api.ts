@@ -43,7 +43,7 @@ export interface ApiClient {
   dashboardSummary(): Promise<any>;
   dashboardAuthorities(): Promise<any>;
   dashboardApprovals(): Promise<any>;
-  dashboardTransactions(): Promise<any>;
+  dashboardTransactions(limit?: number, offset?: number): Promise<any>;
   me(): Promise<Actor>;
   bootstrapOwner(tenantId: string | null, ownerName: string): Promise<BootstrapResult>;
   listCredentials(): Promise<CredentialInfo[]>;
@@ -120,7 +120,7 @@ export function makeLiveClient(_legacyTokenReader?: () => string | null): ApiCli
     dashboardSummary: () => request("GET", "/v1/dashboard/summary"),
     dashboardAuthorities: () => request("GET", "/v1/dashboard/authorities"),
     dashboardApprovals: () => request("GET", "/v1/dashboard/approvals"),
-    dashboardTransactions: () => request("GET", "/v1/dashboard/transactions"),
+    dashboardTransactions: (limit = 50, offset = 0) => request("GET", `/v1/dashboard/transactions?limit=${limit}&offset=${offset}`),
     me: () => request("GET", "/v1/auth/me"),
     bootstrapOwner: (tenantId, ownerName) =>
       request("POST", "/v1/auth/bootstrap-owner", { tenant_id: tenantId || null, owner_name: ownerName || "owner" }),

@@ -49,7 +49,7 @@ export function OverviewPage() {
           <span className="text-xs text-ink-2">{formatMoney(item.amount_micros, item.currency)}</span><span className="text-[10px] text-ink-3">{timeAgo(item.requested_at)}</span>
         </li>)}</ul>}
       </Card>
-      <Card padding="sm"><div className="flex items-center gap-3"><Cable className="h-4 w-4 text-ink-3" /><div className="min-w-0 flex-1"><div className="text-xs font-medium text-ink">Connected integrations</div><p className="mt-0.5 text-[11px] text-ink-3">Razorpay Test Mode · OpenClaw MCP runtime</p></div><Link to="/integrations" className="text-xs font-medium text-accent hover:text-accent-strong">View integrations</Link></div></Card>
+      <Card padding="sm"><div className="flex items-center gap-3"><Cable className="h-4 w-4 text-ink-3" /><div className="min-w-0 flex-1"><div className="text-xs font-medium text-ink">Integration capabilities</div><p className="mt-0.5 text-[11px] text-ink-3">Inspect rail evidence and runtime integration guidance</p></div><Link to="/integrations" className="text-xs font-medium text-accent hover:text-accent-strong">View integrations</Link></div></Card>
     </>}
   </div>;
 }

@@ -1,149 +1,51 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAuth, pushRecent } from "../lib/store";
-import { timeAgo, truncateMiddle } from "../lib/format";
+import { Link, useParams } from "react-router-dom";
+import { useAuth } from "../lib/store";
+import { transactions, matchingReceipts, type Transaction } from "../lib/records";
+import type { Receipt, Reservation, ExecutionRecord } from "../lib/types";
 import { Card, SectionHeader } from "../components/primitives/Card";
-import { Badge } from "../components/primitives/Badge";
 import { Skeleton } from "../components/primitives/Skeleton";
-import { Button } from "../components/primitives/Button";
-import { Money } from "../components/primitives/Money";
-import { AlertTriangle, ArrowLeft, Play, RotateCcw } from "lucide-react";
-import type { Reservation, ExecutionRecord } from "../lib/types";
+import { formatMoneyExact, formatDateTime } from "../lib/format";
 
 export function TransactionDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const { api } = useAuth();
-  const navigate = useNavigate();
-  const [reservation, setReservation] = useState<Reservation | null>(null);
-  const [execRecords, setExecRecords] = useState<ExecutionRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  const load = () => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    api
-      .getReservation(id)
-      .then((r) => {
-        setReservation(r);
-        pushRecent({ id: r.id, kind: "reservation" });
-        return api.getExecutionRecords(r.id);
-      })
-      .then((recs) => setExecRecords(recs))
-      .catch(() => {
-        api
-          .getExecutionRecord(id)
-          .then((rec) => {
-            setExecRecords([rec]);
-            pushRecent({ id: rec.id, kind: "execution_record" });
-          })
-          .catch(() => setError("No spend request, reservation, or execution record found for this ID."));
-      })
-      .finally(() => setLoading(false));
-  };
-
+  const [data,setData] = useState<{transaction:Transaction;reservation:Reservation|null;receipts:Receipt[];records:ExecutionRecord[]}|null>(null);
+  const [error,setError] = useState("");
+  const [loading,setLoading] = useState(true);
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, api]);
-
-  const execute = async () => {
-    if (!reservation) return;
-    setBusy(true);
-    try {
-      const spendId = reservation.spend_request_id;
-      const auth = await api.createExecutionAuth(spendId);
-      const outcome = await api.executeV2(reservation.id, auth.id, { mock_outcome: "SUCCESS" });
-      setReservation(outcome.reservation);
-      setExecRecords((prev) => [outcome.record, ...prev]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Execution failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const reconcile = async () => {
-    if (!reservation) return;
-    setBusy(true);
-    try {
-      const outcome = await api.reconcile(reservation.id, { mock_outcome: "SUCCESS" });
-      setReservation(outcome.reservation);
-      setExecRecords((prev) => [outcome.record, ...prev]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Reconciliation failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (loading) return <Skeleton lines={8} />;
-  if (error && !reservation && execRecords.length === 0) return <Card><p className="text-sm text-danger">{error}</p></Card>;
-
-  const decisionTone = (d: string) =>
-    d === "ALLOW_RESERVED" || d === "CAPTURED" ? "ok" : d === "RELEASED" ? "danger" : d === "UNKNOWN" ? "mystery" : "neutral";
-
-  return (
-    <div className="mx-auto max-w-5xl space-y-5">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-xs text-ink-soft hover:text-ink">
-        <ArrowLeft className="h-3.5 w-3.5" /> Back
-      </button>
-
-      {reservation && (
-        <Card>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="tk-num truncate font-mono text-sm font-semibold text-ink">{reservation.id}</h1>
-                <Badge tone={decisionTone(reservation.status) as "ok" | "warn" | "danger" | "mystery" | "neutral"} dot>{reservation.status}</Badge>
-              </div>
-              <p className="mt-1 text-xs text-ink-faint">
-                spend <span className="tk-num font-mono">{truncateMiddle(reservation.spend_request_id)}</span> · authority {truncateMiddle(reservation.authority_id)}
-              </p>
-            </div>
-            <Money micros={reservation.amount_micros} currency={reservation.currency} size="lg" />
-          </div>
-
-          {reservation.status === "ACTIVE" && (
-            <div className="mt-4 flex gap-2">
-              <Button variant="primary" size="sm" icon={<Play className="h-3.5 w-3.5" />} loading={busy} onClick={execute}>Execute</Button>
-            </div>
-          )}
-          {reservation.status === "UNKNOWN" && (
-            <div className="mt-4 flex gap-2">
-              <Button variant="primary" size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />} loading={busy} onClick={reconcile}>Reconcile</Button>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {execRecords.length > 0 && (
-        <Card>
-          <SectionHeader title="Execution records" description="Attempts to finalize this reservation." />
-          <ul className="mt-3 space-y-1.5">
-            {execRecords.map((rec) => (
-              <li key={rec.id} className="flex items-center gap-3 rounded-md px-2 py-1.5 text-xs hover:bg-sunken">
-                <Badge tone={rec.status === "EXECUTED" ? "ok" : rec.status === "FAILED" ? "danger" : "mystery"} dot>{rec.status}</Badge>
-                <span className="tk-num font-mono text-ink-faint">{truncateMiddle(rec.id)}</span>
-                <span className="text-ink-faint">attempt {rec.attempt_number}</span>
-                {rec.external_transaction_id && <span className="tk-num font-mono text-ink-faint">ext {truncateMiddle(rec.external_transaction_id)}</span>}
-                {rec.error_message && <span className="flex items-center gap-1 text-danger"><AlertTriangle className="h-3 w-3" />{rec.error_message}</span>}
-                <span className="ml-auto text-ink-faint">{timeAgo(rec.executed_at)}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {error && (
-        <Card padding="sm" className="border-danger-soft bg-danger-soft/40">
-          <p className="flex items-center gap-1 text-xs text-danger-strong"><AlertTriangle className="h-3.5 w-3.5" />{error}</p>
-        </Card>
-      )}
-    </div>
-  );
+    let active=true; setLoading(true); setError(""); setData(null);
+    (async () => {
+      const transaction = (await transactions(api)).find(t => t.id === id || t.reservation_id === id);
+      if (!transaction) throw new Error("Request not found in this tenant.");
+      const [reservation, receipts, records] = await Promise.all([
+        transaction.reservation_id ? api.getReservation(transaction.reservation_id) : Promise.resolve(null),
+        api.getAuthorityReceipts(transaction.authority_id),
+        transaction.reservation_id ? api.getExecutionRecords(transaction.reservation_id) : Promise.resolve([])]);
+      if(active)setData({transaction,reservation,receipts:matchingReceipts(receipts,transaction),records});
+    })().catch(e => {if(active)setError(e instanceof Error ? e.message : "Could not load transaction");}).finally(() => {if(active)setLoading(false);});
+    return () => {active=false;};
+  },[api,id]);
+  if(loading)return <Skeleton lines={8}/>;
+  if(error || !data)return <Card><p role="alert">{error || "Request not found"}</p></Card>;
+  const t=data.transaction;
+  return <div className="mx-auto max-w-5xl space-y-5">
+    <Link className="text-xs underline" to="/transactions">Back to transactions</Link>
+    <SectionHeader title={formatMoneyExact(t.amount_micros,t.currency)} description={t.state+" · "+t.agent_id+" · "+t.vendor}/>
+    <Card><dl className="grid gap-3 text-sm sm:grid-cols-2">
+      {[["Request",t.id],["Purpose",t.purpose],["Resource",t.resource_type],["Rail",t.rail],["Requested",formatDateTime(t.requested_at)],["Reservation",data.reservation?.id ?? "None"],["Settlement state",data.reservation?.status ?? "No reservation"],["Provider reference",data.reservation?.external_ref ?? "Not recorded"],["Finalized",formatDateTime(data.reservation?.finalized_at)]].map(([k,v]) => <div className="break-words" key={k}><dt className="text-ink-3">{k}</dt><dd>{v}</dd></div>)}
+    </dl><Link className="mt-4 block text-xs underline" to={"/authorities/"+encodeURIComponent(t.authority_id)}>Inspect mandate / revoke authority</Link></Card>
+    {t.state === "APPROVAL_REQUIRED" && <Link to="/approvals" className="block text-sm underline">Review pending approval</Link>}
+    <Card><SectionHeader title="Execution" description="Execution is performed by the authorized runtime and rail adapter. This console does not select outcomes."/>
+      {data.records.length ? data.records.map(r => <p className="mt-3 break-words text-sm" key={r.id}>{r.rail} · {r.status} · attempt {r.attempt_number} · {r.external_transaction_id ?? "No provider reference"}</p>) : <p className="mt-3 text-sm">No execution attempts returned. Settlement receipts below may record an external provider capture.</p>}
+    </Card>
+    <Card><SectionHeader title="Request, approval and settlement evidence" description="Matching receipts from this authority's audit trail."/>
+      {data.receipts.length ? data.receipts.map(r => <details className="mt-3 border-t border-line pt-3 text-xs" key={r.id}><summary className="cursor-pointer">{r.event_type} · {formatDateTime(r.created_at)}</summary>
+        <Link className="my-2 block underline" to={"/receipts?authority="+encodeURIComponent(t.authority_id)+"&receipt="+encodeURIComponent(r.id)}>Inspect {r.id}</Link>
+        <pre className="overflow-auto whitespace-pre-wrap break-words">{JSON.stringify(r.payload,null,2)}</pre>
+      </details>) : <p className="mt-3 text-sm">No matching receipt returned.</p>}
+    </Card>
+  </div>;
 }
 
 
