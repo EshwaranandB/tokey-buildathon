@@ -1,6 +1,4 @@
-<video src="https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/tokey-demo.mp4" controls width="100%" poster="frontend/public/razorpay.png">
-  Your browser does not support the video tag. <a href="frontend/tokey-demo.mp4">Download the demo video</a>.
-</video>
+[![Tokey Demo](https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/poster.png)](https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/tokey-demo.mp4)
 
 # Tokey
 
