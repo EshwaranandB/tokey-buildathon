@@ -1,4 +1,4 @@
-[![Tokey Demo](https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/poster.png)](https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/tokey-demo.mp4)
+[![Tokey Demo](https://github.com/EshwaranandB/tokey-buildathon/raw/main/frontend/poster.png)](https://github.com/user-attachments/assets/96c6831a-b1d7-49d7-9d61-a766f4672194)
 
 # Tokey
 
